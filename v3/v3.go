@@ -6,10 +6,11 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 
-	"github.com/superoo7/go-gecko/format"
-	"github.com/superoo7/go-gecko/v3/types"
+	"go-gecko/format"
+	"go-gecko/v3/types"
 )
 
 var baseURL = "https://api.coingecko.com/api/v3"
@@ -81,7 +82,7 @@ func (c *Client) SimpleSinglePrice(id string, vsCurrency string) (*types.SimpleS
 	idParam := []string{strings.ToLower(id)}
 	vcParam := []string{strings.ToLower(vsCurrency)}
 
-	t, err := c.SimplePrice(idParam, vcParam)
+	t, err := c.SimplePrice(idParam, vcParam, false)
 	if err != nil {
 		return nil, err
 	}
@@ -94,13 +95,15 @@ func (c *Client) SimpleSinglePrice(id string, vsCurrency string) (*types.SimpleS
 }
 
 // SimplePrice /simple/price Multiple ID and Currency (ids, vs_currencies)
-func (c *Client) SimplePrice(ids []string, vsCurrencies []string) (*map[string]map[string]float32, error) {
+func (c *Client) SimplePrice(ids []string, vsCurrencies []string, dailyChange bool) (*map[string]map[string]float32, error) {
 	params := url.Values{}
 	idsParam := strings.Join(ids[:], ",")
 	vsCurrenciesParam := strings.Join(vsCurrencies[:], ",")
+	strDailyChange := strconv.FormatBool(dailyChange)
 
 	params.Add("ids", idsParam)
 	params.Add("vs_currencies", vsCurrenciesParam)
+	params.Add("include_24hr_change", strDailyChange)
 
 	url := fmt.Sprintf("%s/simple/price?%s", baseURL, params.Encode())
 	resp, err := c.MakeReq(url)
@@ -261,13 +264,13 @@ func (c *Client) CoinsIDHistory(id string, date string, localization bool) (*typ
 }
 
 // CoinsIDMarketChart /coins/{id}/market_chart?vs_currency={usd, eur, jpy, etc.}&days={1,14,30,max}
-func (c *Client) CoinsIDMarketChart(id string, vs_currency string, days string) (*types.CoinsIDMarketChart, error) {
-	if len(id) == 0 || len(vs_currency) == 0 || len(days) == 0 {
+func (c *Client) CoinsIDMarketChart(id string, vsCurrency string, days string) (*types.CoinsIDMarketChart, error) {
+	if len(id) == 0 || len(vsCurrency) == 0 || len(days) == 0 {
 		return nil, fmt.Errorf("id, vs_currency, and days is required")
 	}
 
 	params := url.Values{}
-	params.Add("vs_currency", vs_currency)
+	params.Add("vs_currency", vsCurrency)
 	params.Add("days", days)
 
 	url := fmt.Sprintf("%s/coins/%s/market_chart?%s", baseURL, id, params.Encode())
