@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 
-	"go-gecko/format"
-	"go-gecko/v3/types"
+	"github.com/cruxpool/go-gecko/format"
+	"github.com/cruxpool/go-gecko/v3/types"
 )
 
 var baseURL = "https://api.coingecko.com/api/v3"
